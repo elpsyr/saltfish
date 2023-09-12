@@ -31,7 +31,7 @@ func main() {
 		w.Hide()
 	})
 
-	manager := job.Manager{}
+	manager := &job.Manager{}
 
 	//hello := widget.NewLabel("👑")
 	w.SetContent(container.NewVBox(
