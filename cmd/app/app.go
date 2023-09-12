@@ -13,6 +13,7 @@ import (
 	"github.com/elpsyr/saltfish/pkg/win"
 	"log"
 	"os"
+	"os/exec"
 	"time"
 )
 
@@ -21,8 +22,8 @@ var fishingCount int
 
 func main() {
 	myApp := app.New()
-	w := myApp.NewWindow("salt fish")
-	//resource, err := fyne.LoadResourceFromPath("./images/fish.svg")
+	w := myApp.NewWindow("salt fish @elpsyr")
+	//resource, err := fyne.LoadResourceFromPath("./images/xianyu.svg")
 	//if err != nil {
 	//	fmt.Println("LoadResourceFromPath ERROR:", err)
 	//}
@@ -62,6 +63,9 @@ func main() {
 			hwnd := win.GetHwndByTitle("咸鱼之王")
 			go manager.GetFish(hwnd)
 		}),
+		widget.NewButton("how to use", func() {
+			openURLInBrowser("https://github.com/elpsyr/saltfish")
+		}),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), workLabel, layout.NewSpacer()),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), timeLabel, layout.NewSpacer()),
 	))
@@ -88,7 +92,7 @@ func main() {
 	)
 
 	if desk, ok := myApp.(desktop.App); ok {
-		//resourceIco, err := fyne.LoadResourceFromPath("./images/fish.ico")
+		//resourceIco, err := fyne.LoadResourceFromPath("./images/xianyu.ico")
 		//if err != nil {
 		//	fmt.Println("LoadResourceFromPath ERROR:", err)
 		//}
@@ -182,4 +186,10 @@ func GetFish8Hour(m *job.Manager, label *widget.Label) {
 		}
 	}()
 
+}
+
+func openURLInBrowser(urlStr string) error {
+	// 使用默认浏览器打开指定的 URL (Windows)
+	cmd := exec.Command("cmd", "/c", "start", urlStr)
+	return cmd.Start()
 }
