@@ -67,10 +67,25 @@ func main() {
 	))
 
 	menu := fyne.NewMenu("MyApp",
-		fyne.NewMenuItem("Show", func() {
+		fyne.NewMenuItem("open", func() {
 			log.Println("Tapped show")
 			w.Show()
-		}))
+		}),
+		fyne.NewMenuItem("show", func() {
+			hwnd := win.GetHwndByTitle("咸鱼之王")
+			win.ShowWindow(hwnd)
+			win.SetTopWindow(hwnd)
+		}),
+		fyne.NewMenuItem("hide", func() {
+			hwnd := win.GetHwndByTitle("咸鱼之王")
+			win.SetTopWindow(hwnd)
+			win.HideWindow(hwnd)
+		}),
+		fyne.NewMenuItem("reward", func() {
+			hwnd := win.GetHwndByTitle("咸鱼之王")
+			go manager.GetReward(hwnd)
+		}),
+	)
 
 	if desk, ok := myApp.(desktop.App); ok {
 		//resourceIco, err := fyne.LoadResourceFromPath("./images/fish.ico")
