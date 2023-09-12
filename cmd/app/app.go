@@ -12,8 +12,8 @@ import (
 	"github.com/elpsyr/saltfish/internal/job"
 	"github.com/elpsyr/saltfish/pkg/win"
 	"log"
+	"net/url"
 	"os"
-	"os/exec"
 	"time"
 )
 
@@ -38,7 +38,11 @@ func main() {
 	})
 
 	manager := &job.Manager{}
-
+	parse, err := url.Parse("https://github.com/elpsyr/saltfish")
+	if err != nil {
+		fmt.Println(err)
+	}
+	hyperlink := widget.NewHyperlink("How to use", parse)
 	workLabel := widget.NewLabel(fmt.Sprintf("Rewards : %d Fishing : %d", rewardCount, fishingCount))
 	timeLabel := widget.NewLabel("Run Time : 00:00:00")
 	w.SetContent(container.NewVBox(
@@ -63,11 +67,10 @@ func main() {
 			hwnd := win.GetHwndByTitle("咸鱼之王")
 			go manager.GetFish(hwnd)
 		}),
-		widget.NewButton("how to use", func() {
-			openURLInBrowser("https://github.com/elpsyr/saltfish")
-		}),
+
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), workLabel, layout.NewSpacer()),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), timeLabel, layout.NewSpacer()),
+		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), hyperlink, layout.NewSpacer()),
 	))
 
 	menu := fyne.NewMenu("MyApp",
@@ -186,10 +189,4 @@ func GetFish8Hour(m *job.Manager, label *widget.Label) {
 		}
 	}()
 
-}
-
-func openURLInBrowser(urlStr string) error {
-	// 使用默认浏览器打开指定的 URL (Windows)
-	cmd := exec.Command("cmd", "/c", "start", urlStr)
-	return cmd.Start()
 }
