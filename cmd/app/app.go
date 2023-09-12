@@ -22,11 +22,11 @@ var fishingCount int
 func main() {
 	myApp := app.New()
 	w := myApp.NewWindow("salt fish")
-	resource, err := fyne.LoadResourceFromPath("./images/fish.svg")
-	if err != nil {
-		fmt.Println("LoadResourceFromPath ERROR:", err)
-	}
-	w.SetIcon(resource)
+	//resource, err := fyne.LoadResourceFromPath("./images/fish.svg")
+	//if err != nil {
+	//	fmt.Println("LoadResourceFromPath ERROR:", err)
+	//}
+	//w.SetIcon(resource)
 	w.Resize(fyne.Size{
 		Width: 300,
 	})
@@ -73,11 +73,11 @@ func main() {
 		}))
 
 	if desk, ok := myApp.(desktop.App); ok {
-		resourceIco, err := fyne.LoadResourceFromPath("./images/fish.ico")
-		if err != nil {
-			fmt.Println("LoadResourceFromPath ERROR:", err)
-		}
-		desk.SetSystemTrayIcon(resourceIco)
+		//resourceIco, err := fyne.LoadResourceFromPath("./images/fish.ico")
+		//if err != nil {
+		//	fmt.Println("LoadResourceFromPath ERROR:", err)
+		//}
+		//desk.SetSystemTrayIcon(resourceIco)
 		desk.SetSystemTrayMenu(menu)
 	}
 
@@ -130,8 +130,8 @@ func updateTimeLabel(label *widget.Label) {
 
 func GetReward2Hour(m *job.Manager, label *widget.Label) {
 	// 创建一个每隔2小时触发一次的Ticker
-	//ticker := time.NewTicker(2 * time.Hour)
-	ticker := time.NewTicker(30 * time.Second)
+	ticker := time.NewTicker(2 * time.Hour)
+	//ticker := time.NewTicker(30 * time.Second)
 
 	// 启动一个goroutine来处理Ticker触发的事件
 	go func() {
