@@ -68,7 +68,17 @@ func MockClick(hwndAddress uintptr, x, y int) {
 
 func PerformBackgroundClick(hwnd win.HWND, x, y int, cnt int) {
 
-	lParam := win.MAKELONG(uint16(x), uint16(y))
+	width, height, err := GetWindowSize(uintptr(hwnd))
+	if err != nil {
+		fmt.Printf("获取窗口大小失败：%v\n", err)
+		return
+	}
+
+	// 计算要点击的位置
+	clickX := int32(float64(width) * float64(x) / WindowWidth)
+	clickY := int32(float64(height) * float64(y) / WindowHeight)
+
+	lParam := win.MAKELONG(uint16(clickX), uint16(clickY))
 	count := 0
 	for count < cnt {
 		win.SendMessage(hwnd, win.WM_LBUTTONDOWN, win.MK_LBUTTON, uintptr(lParam))
