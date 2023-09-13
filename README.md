@@ -23,6 +23,12 @@
   <img width="400" alt="Example of run salt fish" src="./images/examples/fishing.png">
 </picture>
 
+
+## 使用
+1. 打开电脑端微信，并打开“咸鱼之王”小程序
+2. 打开`saltfish`助手并使用
+3. 点击`hide`隐藏小程序，可全屏打开其他应用不掉线，或进行挂机
+
 ## 构建
 ```shell
 cd cmd/app/
