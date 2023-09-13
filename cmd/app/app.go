@@ -5,12 +5,12 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"fyne.io/systray"
 	"github.com/elpsyr/saltfish/internal/job"
-	"github.com/elpsyr/saltfish/pkg/win"
 	"log"
 	"net/url"
 	"os"
@@ -37,35 +37,35 @@ func main() {
 		w.Hide()
 	})
 
-	manager := &job.Manager{}
+	manager := job.NewManager()
+
 	parse, err := url.Parse("https://github.com/elpsyr/saltfish")
 	if err != nil {
 		fmt.Println(err)
 	}
 	hyperlink := widget.NewHyperlink("How to use", parse)
-	workLabel := widget.NewLabel(fmt.Sprintf("Rewards : %d Fishing : %d", rewardCount, fishingCount))
+
+	str := binding.NewString()
+	str.Set(fmt.Sprintf("Rewards : %d Fishing : %d", manager.GetCountReward(), manager.GetCountFish()))
+	workLabel := widget.NewLabelWithData(str)
+
 	timeLabel := widget.NewLabel("Run Time : 00:00:00")
 	w.SetContent(container.NewVBox(
 		widget.NewButton("hide", func() {
-			//hello.SetText("🦈️")
-			hwnd := win.GetHwndByTitle("咸鱼之王")
-			win.SetTopWindow(hwnd)
-			win.HideWindow(hwnd)
+			manager.HideMode()
 		}),
 		widget.NewButton("show", func() {
-			//hello.SetText("🐟")
-			hwnd := win.GetHwndByTitle("咸鱼之王")
-			win.ShowWindow(hwnd)
-			win.SetTopWindow(hwnd)
+			manager.ShowMode()
 		}),
 		widget.NewButton("reward", func() {
-			//hello.SetText("🪙")
-			hwnd := win.GetHwndByTitle("咸鱼之王")
-			go manager.GetReward(hwnd)
+			go manager.SetCallBack(func() {
+				str.Set(fmt.Sprintf("Rewards : %d Fishing : %d", manager.GetCountReward(), manager.GetCountFish()))
+			}).GetReward()
 		}),
 		widget.NewButton("fishing", func() {
-			hwnd := win.GetHwndByTitle("咸鱼之王")
-			go manager.GetFish(hwnd)
+			go manager.SetCallBack(func() {
+				str.Set(fmt.Sprintf("Rewards : %d Fishing : %d", manager.GetCountReward(), manager.GetCountFish()))
+			}).GetFish()
 		}),
 
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), workLabel, layout.NewSpacer()),
@@ -79,18 +79,13 @@ func main() {
 			w.Show()
 		}),
 		fyne.NewMenuItem("show", func() {
-			hwnd := win.GetHwndByTitle("咸鱼之王")
-			win.ShowWindow(hwnd)
-			win.SetTopWindow(hwnd)
+			manager.ShowMode()
 		}),
 		fyne.NewMenuItem("hide", func() {
-			hwnd := win.GetHwndByTitle("咸鱼之王")
-			win.SetTopWindow(hwnd)
-			win.HideWindow(hwnd)
+			manager.HideMode()
 		}),
 		fyne.NewMenuItem("reward", func() {
-			hwnd := win.GetHwndByTitle("咸鱼之王")
-			go manager.GetReward(hwnd)
+			go manager.GetReward()
 		}),
 	)
 
@@ -104,8 +99,8 @@ func main() {
 	}
 
 	go updateTimeLabel(timeLabel)
-	GetReward2Hour(manager, workLabel) // 注册
-	GetFish8Hour(manager, workLabel)   // 注册
+	GetReward2Hour(manager, str) // 注册
+	GetFish8Hour(manager, str)   // 注册
 
 	//systray.Run(onReady, onExit)
 	w.ShowAndRun()
@@ -150,10 +145,10 @@ func updateTimeLabel(label *widget.Label) {
 	}
 }
 
-func GetReward2Hour(m *job.Manager, label *widget.Label) {
+func GetReward2Hour(m *job.Manager, str binding.String) {
 	// 创建一个每隔2小时触发一次的Ticker
-	ticker := time.NewTicker(2 * time.Hour)
-	//ticker := time.NewTicker(30 * time.Second)
+	//ticker := time.NewTicker(2 * time.Hour)
+	ticker := time.NewTicker(30 * time.Second)
 
 	// 启动一个goroutine来处理Ticker触发的事件
 	go func() {
@@ -161,17 +156,16 @@ func GetReward2Hour(m *job.Manager, label *widget.Label) {
 			select {
 			case <-ticker.C:
 				// 在Ticker触发时调用方法A
-				hwnd := win.GetHwndByTitle("咸鱼之王")
-				m.GetReward(hwnd)
-				rewardCount++
-				label.SetText(fmt.Sprintf("Rewards : %d Fishing : %d", rewardCount, fishingCount))
+				go m.SetCallBack(func() {
+					str.Set(fmt.Sprintf("Rewards : %d Fishing : %d", m.GetCountReward(), m.GetCountFish()))
+				}).GetReward()
 			}
 		}
 	}()
 
 }
 
-func GetFish8Hour(m *job.Manager, label *widget.Label) {
+func GetFish8Hour(m *job.Manager, str binding.String) {
 	// 创建一个每隔8小时触发一次的Ticker
 	ticker := time.NewTicker(8*time.Hour + time.Minute)
 
@@ -181,10 +175,9 @@ func GetFish8Hour(m *job.Manager, label *widget.Label) {
 			select {
 			case <-ticker.C:
 				// 在Ticker触发时调用方法A
-				hwnd := win.GetHwndByTitle("咸鱼之王")
-				m.GetFish(hwnd)
-				fishingCount++
-				label.SetText(fmt.Sprintf("Rewards : %d Fishing : %d", rewardCount, fishingCount))
+				go m.SetCallBack(func() {
+					str.Set(fmt.Sprintf("Rewards : %d Fishing : %d", m.GetCountReward(), m.GetCountFish()))
+				}).GetFish()
 			}
 		}
 	}()

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (m *Manager) GetReward(hwnd uintptr) {
+func (m *Manager) GetReward() {
 	instance := m.GetInstance()
 	// instance.mu.Lock() 是阻塞操作，这里使用 TryLock进行判断
 	tryLock := instance.mu.TryLock()
@@ -20,6 +20,12 @@ func (m *Manager) GetReward(hwnd uintptr) {
 	}
 	defer instance.mu.Unlock()
 	fmt.Println("Acquire lock. get reward...")
+
+	hwnd := m.GetHwnd()
+	if hwnd == 0 {
+		return
+	}
+
 	// reset
 	m.BackToHome(hwnd)
 	// do job
@@ -28,6 +34,13 @@ func (m *Manager) GetReward(hwnd uintptr) {
 	win.PerformBackgroundClick(lxnWin.HWND(hwnd), 150, 675, 5)
 	// reset
 	m.BackToHome(hwnd)
+	m.countReward++
 	time.Sleep(time.Second * 3)
+
+	// 调用回调函数
+	if m.callback != nil {
+		m.callback()
+		m.callback = nil
+	}
 
 }

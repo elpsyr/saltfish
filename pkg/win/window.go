@@ -26,7 +26,7 @@ func GetHwndByTitle(windowTitle string) uintptr {
 		_ = syscall.UTF16ToString(buffer[:])
 		return hwnd
 	} else {
-		println("未找到窗口")
+		// 未找到窗口
 		return hwnd
 	}
 }

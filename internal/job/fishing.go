@@ -8,7 +8,7 @@ import (
 )
 
 // GetFish 钓鱼
-func (m *Manager) GetFish(hwnd uintptr) {
+func (m *Manager) GetFish() {
 	instance := m.GetInstance()
 	// instance.mu.Lock() 是阻塞操作，这里使用 TryLock进行判断
 	tryLock := instance.mu.TryLock()
@@ -21,6 +21,11 @@ func (m *Manager) GetFish(hwnd uintptr) {
 	}
 	defer instance.mu.Unlock()
 	fmt.Println("Acquire lock. fishing...")
+
+	hwnd := m.GetHwnd()
+	if hwnd == 0 {
+		return
+	}
 	// reset
 	m.BackToHome(hwnd)
 	// do job
@@ -37,4 +42,11 @@ func (m *Manager) GetFish(hwnd uintptr) {
 	win.PerformBackgroundClick(lxnWin.HWND(hwnd), 45, 750, 1)
 	time.Sleep(time.Second * 3)
 	win.PerformBackgroundClick(lxnWin.HWND(hwnd), 45, 750, 1)
+	m.countFish++
+
+	// 调用回调函数
+	if m.callback != nil {
+		m.callback()
+		m.callback = nil
+	}
 }
