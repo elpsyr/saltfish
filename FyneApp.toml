@@ -1,0 +1,8 @@
+Website = "https://github.com/elpsyr/saltfish"
+
+[Details]
+  Icon = "images/xianyu.ico"
+  Name = "salt fish"
+  ID = "github.com.elpsyr.saltfish"
+  Version = "0.0.2"
+  Build = 2

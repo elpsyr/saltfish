@@ -31,6 +31,5 @@
 
 ## 构建
 ```shell
-cd cmd/app/
-fyne package -os windows -icon ../../images/fish.ico
+fyne package -release -os windows 
 ```
