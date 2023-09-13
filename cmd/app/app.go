@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"fmt"
@@ -10,24 +10,21 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"fyne.io/systray"
+	x "fyne.io/x/fyne/widget"
 	"github.com/elpsyr/saltfish/internal/job"
 	"log"
 	"net/url"
-	"os"
 	"time"
 )
 
-var rewardCount int
-var fishingCount int
-
-func main() {
+//go:generate fyne bundle -o bundled.go ../../images/xianyu.svg
+//go:generate fyne bundle -o bundled.go -append ../../images/xianyu.ico
+//go:generate fyne bundle -o bundled.go -append ../../images/moyu.gif
+func Run() {
 	myApp := app.New()
 	w := myApp.NewWindow("salt fish @elpsyr")
-	//resource, err := fyne.LoadResourceFromPath("./images/xianyu.svg")
-	//if err != nil {
-	//	fmt.Println("LoadResourceFromPath ERROR:", err)
-	//}
-	//w.SetIcon(resource)
+
+	w.SetIcon(resourceXianyuIco)
 	w.Resize(fyne.Size{
 		Width: 300,
 	})
@@ -50,7 +47,18 @@ func main() {
 	workLabel := widget.NewLabelWithData(str)
 
 	timeLabel := widget.NewLabel("Run Time : 00:00:00")
+
+	// gif
+	//gif, err := x.NewAnimatedGif(storage.NewFileURI("./images/moyu.gif"))
+	gif, err := x.NewAnimatedGifFromResource(resourceMoyuGif)
+	gif.Show()
+	gif.SetMinSize(fyne.Size{
+		Width:  20,
+		Height: 20,
+	})
+	gif.Start()
 	w.SetContent(container.NewVBox(
+		//gif,
 		widget.NewButton("hide", func() {
 			manager.HideMode()
 		}),
@@ -70,7 +78,7 @@ func main() {
 
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), workLabel, layout.NewSpacer()),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), timeLabel, layout.NewSpacer()),
-		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), hyperlink, layout.NewSpacer()),
+		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), gif, hyperlink, layout.NewSpacer()),
 	))
 
 	menu := fyne.NewMenu("MyApp",
@@ -90,11 +98,7 @@ func main() {
 	)
 
 	if desk, ok := myApp.(desktop.App); ok {
-		//resourceIco, err := fyne.LoadResourceFromPath("./images/xianyu.ico")
-		//if err != nil {
-		//	fmt.Println("LoadResourceFromPath ERROR:", err)
-		//}
-		//desk.SetSystemTrayIcon(resourceIco)
+		desk.SetSystemTrayIcon(resourceXianyuIco)
 		desk.SetSystemTrayMenu(menu)
 	}
 
@@ -108,19 +112,23 @@ func main() {
 
 func onReady() {
 
-	// 使用 ioutil.ReadFile 读取图片文件内容
-	imageBytes, err := os.ReadFile("./images/fish.ico")
-	if err != nil {
-		fmt.Println("无法读取图片文件:", err)
-		return
-	}
-	systray.SetIcon(imageBytes)
-	systray.SetTitle("Awesome App")
-	systray.SetTooltip("Pretty awesome超级棒")
-	mQuit := systray.AddMenuItem("Quit", "Quit the whole app")
+	systray.SetIcon(resourceXianyuIco.Content())
+	systray.SetTitle("salt fish")
+	systray.SetTooltip("salt fish")
 
-	// Sets the icon of a menu item.
-	mQuit.SetIcon(imageBytes)
+	mOpen := systray.AddMenuItem("open", "")
+	mQuit := systray.AddMenuItem("quit", "")
+
+	go func() {
+		for {
+			select {
+			case <-mOpen.ClickedCh:
+				fmt.Println("open")
+			case <-mQuit.ClickedCh:
+				fmt.Println("quit")
+			}
+		}
+	}()
 }
 
 func onExit() {
@@ -146,9 +154,9 @@ func updateTimeLabel(label *widget.Label) {
 }
 
 func GetReward2Hour(m *job.Manager, str binding.String) {
-	// 创建一个每隔2小时触发一次的Ticker
-	//ticker := time.NewTicker(2 * time.Hour)
-	ticker := time.NewTicker(30 * time.Second)
+	// 创建一个每隔4小时触发一次的Ticker
+	ticker := time.NewTicker(4 * time.Hour)
+	//ticker := time.NewTicker(30 * time.Second)
 
 	// 启动一个goroutine来处理Ticker触发的事件
 	go func() {
