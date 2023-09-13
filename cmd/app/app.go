@@ -182,8 +182,8 @@ func GetFish8Hour(m *job.Manager, label *widget.Label) {
 			case <-ticker.C:
 				// 在Ticker触发时调用方法A
 				hwnd := win.GetHwndByTitle("咸鱼之王")
-				m.GetReward(hwnd)
-				rewardCount++
+				m.GetFish(hwnd)
+				fishingCount++
 				label.SetText(fmt.Sprintf("Rewards : %d Fishing : %d", rewardCount, fishingCount))
 			}
 		}
