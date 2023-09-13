@@ -8,6 +8,7 @@ var (
 	getWindowText            = user32DLL.NewProc("GetWindowTextW")
 	getWindowThreadProcessID = user32DLL.NewProc("GetWindowThreadProcessId")
 	getWindowRect            = user32DLL.NewProc("GetWindowRect")
+	setWindowPos             = user32DLL.NewProc("SetWindowPos")
 
 	// 点击
 	setCursorPos = user32DLL.NewProc("SetCursorPos")

@@ -77,3 +77,9 @@ func ShowWindow(hwnd uintptr) bool {
 func SetTopWindow(hwnd uintptr) {
 	setForegroundWin.Call(hwnd)
 }
+
+func SetWindowSize(hwnd uintptr, width, height int) {
+	setWindowPos.Call(
+		uintptr(hwnd), 0, 0, 0, uintptr(width), uintptr(height), 0,
+	)
+}

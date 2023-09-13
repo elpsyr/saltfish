@@ -35,6 +35,7 @@ func Run() {
 	})
 
 	manager := job.NewManager()
+	//manager.ResizeWindow()
 
 	parse, err := url.Parse("https://github.com/elpsyr/saltfish")
 	if err != nil {
