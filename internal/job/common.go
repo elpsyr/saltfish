@@ -16,3 +16,11 @@ func (m *Manager) ResizeWindow() {
 	}
 	win.SetWindowSize(hwnd, 450, 844)
 }
+
+func (m *Manager) AlphaWindow(alpha int) {
+	hwnd := m.GetHwnd()
+	if hwnd == 0 {
+		return
+	}
+	win.SetWindowAlpha(hwnd, alpha)
+}

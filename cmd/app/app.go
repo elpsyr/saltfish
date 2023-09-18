@@ -58,6 +58,15 @@ func Run() {
 		Height: 20,
 	})
 	gif.Start()
+
+	slider := widget.NewSlider(1, 255)
+	alpha := binding.NewFloat()
+	alpha.Set(255)
+	slider.Bind(alpha)
+	slider.OnChanged = func(f float64) {
+		manager.AlphaWindow(int(f))
+	}
+
 	w.SetContent(container.NewVBox(
 		//gif,
 		widget.NewButton("hide", func() {
@@ -77,6 +86,7 @@ func Run() {
 			}).GetFish()
 		}),
 
+		container.New(layout.NewStackLayout(), slider),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), workLabel, layout.NewSpacer()),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), timeLabel, layout.NewSpacer()),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), gif, hyperlink, layout.NewSpacer()),

@@ -3,12 +3,15 @@ package win
 import "syscall"
 
 var (
-	user32DLL                = syscall.NewLazyDLL("user32.dll")
-	findWindow               = user32DLL.NewProc("FindWindowW")
-	getWindowText            = user32DLL.NewProc("GetWindowTextW")
-	getWindowThreadProcessID = user32DLL.NewProc("GetWindowThreadProcessId")
-	getWindowRect            = user32DLL.NewProc("GetWindowRect")
-	setWindowPos             = user32DLL.NewProc("SetWindowPos")
+	user32DLL                  = syscall.NewLazyDLL("user32.dll")
+	findWindow                 = user32DLL.NewProc("FindWindowW")
+	getWindowText              = user32DLL.NewProc("GetWindowTextW")
+	getWindowThreadProcessID   = user32DLL.NewProc("GetWindowThreadProcessId")
+	getWindowRect              = user32DLL.NewProc("GetWindowRect")
+	setWindowPos               = user32DLL.NewProc("SetWindowPos")
+	setLayeredWindowAttributes = user32DLL.NewProc("SetLayeredWindowAttributes")
+	setWindowLong              = user32DLL.NewProc("SetWindowLongW")
+	getWindowLong              = user32DLL.NewProc("GetWindowLongW")
 
 	// 点击
 	setCursorPos = user32DLL.NewProc("SetCursorPos")

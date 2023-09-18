@@ -83,3 +83,24 @@ func SetWindowSize(hwnd uintptr, width, height int) {
 		uintptr(hwnd), 0, 0, 0, uintptr(width), uintptr(height), 0,
 	)
 }
+
+const (
+	GWL_EXSTYLE      = 0xFFFFFFEC
+	WS_EX_TOOLWINDOW = 0x00000080
+	WS_EX_LAYERED    = 0x80000
+
+	LWA_COLORKEY = 0x1
+	LWA_ALPHA    = 0x2
+)
+
+func SetWindowAlpha(hwnd uintptr, alpha int) error {
+
+	style, _, _ := getWindowLong.Call(uintptr(hwnd), GWL_EXSTYLE)
+	setWindowLong.Call(uintptr(hwnd), GWL_EXSTYLE, style|WS_EX_LAYERED)
+	setLayeredWindowAttributes.Call(uintptr(hwnd), 0, uintptr(alpha), LWA_ALPHA)
+	_, _, err := setLayeredWindowAttributes.Call(uintptr(hwnd), 0, uintptr(alpha), LWA_ALPHA)
+	if err != nil && err.Error() != "The operation completed successfully." {
+		return err
+	}
+	return nil
+}
