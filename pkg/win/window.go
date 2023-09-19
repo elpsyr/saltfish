@@ -1,6 +1,7 @@
 package win
 
 import (
+	"github.com/lxn/win"
 	"syscall"
 	"unsafe"
 )
@@ -103,4 +104,14 @@ func SetWindowAlpha(hwnd uintptr, alpha int) error {
 		return err
 	}
 	return nil
+}
+
+const (
+	WM_CLOSE = 0x0010 //关闭窗口
+)
+
+func CloseWindow(hwnd uintptr) {
+
+	// 发送关闭窗口消息
+	_, _, _ = postMessage.Call(hwnd, win.WM_CLOSE, 0, 0)
 }

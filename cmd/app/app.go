@@ -85,6 +85,9 @@ func Run() {
 				str.Set(fmt.Sprintf("Rewards : %d Fishing : %d", manager.GetCountReward(), manager.GetCountFish()))
 			}).GetFish()
 		}),
+		widget.NewButton("restart", func() {
+			go manager.Restart()
+		}),
 
 		container.New(layout.NewStackLayout(), slider),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), workLabel, layout.NewSpacer()),
@@ -116,8 +119,6 @@ func Run() {
 
 	drv := fyne.CurrentApp().Driver()
 	if drv, ok := drv.(desktop.Driver); ok {
-		fmt.Println(ok)
-
 		_w := drv.CreateSplashWindow()
 		spGif, err := x.NewAnimatedGifFromResource(resourceMoyuGif)
 		if err != nil {
@@ -133,7 +134,7 @@ func Run() {
 
 		_w.Show()
 		go func() {
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 1)
 			_w.Close()
 			spGif.Stop()
 			w.Show()

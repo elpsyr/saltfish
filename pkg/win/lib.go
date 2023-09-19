@@ -13,6 +13,8 @@ var (
 	setWindowLong              = user32DLL.NewProc("SetWindowLongW")
 	getWindowLong              = user32DLL.NewProc("GetWindowLongW")
 
+	postMessage = user32DLL.NewProc("PostMessageW")
+
 	// 点击
 	setCursorPos = user32DLL.NewProc("SetCursorPos")
 	mouseEvent   = user32DLL.NewProc("mouse_event")
