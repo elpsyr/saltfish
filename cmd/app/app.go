@@ -67,7 +67,7 @@ func Run() {
 		manager.AlphaWindow(int(f))
 	}
 
-	w.SetContent(container.NewVBox(
+	box := container.NewVBox(
 		//gif,
 		widget.NewButton("hide", func() {
 			manager.HideMode()
@@ -90,7 +90,8 @@ func Run() {
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), workLabel, layout.NewSpacer()),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), timeLabel, layout.NewSpacer()),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), gif, hyperlink, layout.NewSpacer()),
-	))
+	)
+	w.SetContent(box)
 
 	menu := fyne.NewMenu("MyApp",
 		fyne.NewMenuItem("open", func() {
@@ -113,12 +114,39 @@ func Run() {
 		desk.SetSystemTrayMenu(menu)
 	}
 
+	drv := fyne.CurrentApp().Driver()
+	if drv, ok := drv.(desktop.Driver); ok {
+		fmt.Println(ok)
+
+		_w := drv.CreateSplashWindow()
+		spGif, err := x.NewAnimatedGifFromResource(resourceMoyuGif)
+		if err != nil {
+		}
+		spGif.Show()
+		spGif.SetMinSize(fyne.Size{
+			Width:  150,
+			Height: 150,
+		})
+		spGif.Start()
+
+		_w.SetContent(spGif)
+
+		_w.Show()
+		go func() {
+			time.Sleep(time.Second * 3)
+			_w.Close()
+			spGif.Stop()
+			w.Show()
+		}()
+	}
+
 	go updateTimeLabel(timeLabel)
 	GetReward2Hour(manager, str) // 注册
 	GetFish8Hour(manager, str)   // 注册
 
 	//systray.Run(onReady, onExit)
-	w.ShowAndRun()
+	//w.ShowAndRun()
+	myApp.Run()
 }
 
 func onReady() {
@@ -140,6 +168,24 @@ func onReady() {
 			}
 		}
 	}()
+}
+
+func logLifecycle(a fyne.App) {
+	a.Lifecycle().SetOnStarted(func() {
+		drv := fyne.CurrentApp().Driver()
+		if drv, ok := drv.(desktop.Driver); ok {
+			fmt.Println(ok)
+
+			w := drv.CreateSplashWindow()
+			w.SetContent(widget.NewLabelWithStyle("Hello World!\n\nMake a splash!",
+				fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+			//go func() {
+			//	time.Sleep(time.Second * 3)
+			//	w.Close()
+			//}()
+			w.Show()
+		}
+	})
 }
 
 func onExit() {
