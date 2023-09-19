@@ -22,6 +22,7 @@ var (
 
 var (
 	setForegroundWin    = user32DLL.NewProc("SetForegroundWindow")
+	getWindowLongPtr    = user32DLL.NewProc("GetWindowLongPtrW")
 	showWindow          = user32DLL.NewProc("ShowWindow")
 	setForegroundWindow = user32DLL.NewProc("SetForegroundWindow")
 )

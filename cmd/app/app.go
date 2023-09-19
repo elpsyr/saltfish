@@ -108,7 +108,12 @@ func Run() {
 			manager.HideMode()
 		}),
 		fyne.NewMenuItem("reward", func() {
-			go manager.GetReward()
+			go manager.SetCallBack(func() {
+				str.Set(fmt.Sprintf("Rewards : %d Fishing : %d", manager.GetCountReward(), manager.GetCountFish()))
+			}).GetReward()
+		}),
+		fyne.NewMenuItem("restart", func() {
+			go manager.Restart()
 		}),
 	)
 

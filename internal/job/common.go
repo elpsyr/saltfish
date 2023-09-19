@@ -48,6 +48,7 @@ func (m *Manager) Restart() {
 	if hwndRestart == 0 {
 		return
 	}
+	win.HideWindow(hwndRestart)
 	for i := 0; i < 10; i++ {
 		win.PerformBackgroundClick(lxnWin.HWND(hwndRestart), 230, 800, 1)
 		time.Sleep(time.Second)
