@@ -14,6 +14,7 @@ import (
 	"github.com/elpsyr/saltfish/internal/job"
 	"log"
 	"net/url"
+	"sync"
 	"time"
 )
 
@@ -67,6 +68,15 @@ func Run() {
 		manager.AlphaWindow(int(f))
 	}
 
+	selected := widget.NewSelect([]string{"4h5s", "6h5s", "8h5s", "13h5s"}, func(s string) {
+		GetReward2Hour(manager, str, s)
+		fmt.Println("selected", s)
+	})
+	selected.Alignment = 1
+	// default
+	selected.SetSelected("4h5s")
+	//GetReward2Hour(manager, str, "4h5s")
+
 	box := container.NewVBox(
 		//gif,
 		widget.NewButton("hide", func() {
@@ -80,6 +90,7 @@ func Run() {
 				str.Set(fmt.Sprintf("Rewards : %d Fishing : %d", manager.GetCountReward(), manager.GetCountFish()))
 			}).GetReward()
 		}),
+		selected,
 		widget.NewButton("fishing", func() {
 			go manager.SetCallBack(func() {
 				str.Set(fmt.Sprintf("Rewards : %d Fishing : %d", manager.GetCountReward(), manager.GetCountFish()))
@@ -88,7 +99,7 @@ func Run() {
 		widget.NewButton("restart", func() {
 			go manager.Restart()
 		}),
-
+		//selected,
 		container.New(layout.NewStackLayout(), slider),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), workLabel, layout.NewSpacer()),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), timeLabel, layout.NewSpacer()),
@@ -147,8 +158,8 @@ func Run() {
 	}
 
 	go updateTimeLabel(timeLabel)
-	GetReward2Hour(manager, str) // 注册
-	GetFish8Hour(manager, str)   // 注册
+	//GetReward2Hour(manager, str) // 注册
+	GetFish8Hour(manager, str) // 注册
 
 	//systray.Run(onReady, onExit)
 	//w.ShowAndRun()
@@ -216,13 +227,48 @@ func updateTimeLabel(label *widget.Label) {
 	}
 }
 
-func GetReward2Hour(m *job.Manager, str binding.String) {
+var (
+	mutex      sync.Mutex
+	activeGor  bool
+	exitSignal chan struct{}
+)
+
+func GetReward2Hour(m *job.Manager, str binding.String, timeString string) {
+
+	interval, err := time.ParseDuration(timeString)
+	if err != nil {
+		fmt.Println("解析时间间隔出错:", err)
+		return
+	}
+	fmt.Println(interval.String())
+
 	// 创建一个每隔4小时触发一次的Ticker
-	ticker := time.NewTicker(4 * time.Hour)
+	ticker := time.NewTicker(interval)
 	//ticker := time.NewTicker(30 * time.Second)
+
+	// 使用互斥锁控制goroutine的创建和销毁
+	mutex.Lock()
+	if activeGor {
+		// 发送退出信号通知之前的goroutine退出
+		fmt.Println("正在运行,发送退出信号：")
+		exitSignal <- struct{}{}
+		//ticker.Stop()
+	}
+	activeGor = true
+	mutex.Unlock()
+
+	// 创建一个退出通道
+	exitSignal = make(chan struct{})
 
 	// 启动一个goroutine来处理Ticker触发的事件
 	go func() {
+		defer func() {
+			mutex.Lock()
+			//activeGor = false
+			//close(exitSignal) // 关闭退出通道
+			ticker.Stop()
+			mutex.Unlock()
+		}()
 		for {
 			select {
 			case <-ticker.C:
@@ -230,7 +276,11 @@ func GetReward2Hour(m *job.Manager, str binding.String) {
 				go m.SetCallBack(func() {
 					str.Set(fmt.Sprintf("Rewards : %d Fishing : %d", m.GetCountReward(), m.GetCountFish()))
 				}).GetReward()
+			case <-exitSignal:
+				fmt.Println(interval.String() + " 协程退出")
+				return // 退出goroutine
 			}
+
 		}
 	}()
 
