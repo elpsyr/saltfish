@@ -49,6 +49,7 @@ func Run() {
 	workLabel := widget.NewLabelWithData(str)
 
 	timeLabel := widget.NewLabel("Run Time : 00:00:00")
+	rwTimeLabel := widget.NewLabel("Reward Time : 00:00:00")
 
 	// gif
 	//gif, err := x.NewAnimatedGif(storage.NewFileURI("./images/moyu.gif"))
@@ -68,8 +69,10 @@ func Run() {
 		manager.AlphaWindow(int(f))
 	}
 
-	selected := widget.NewSelect([]string{"4h5s", "6h5s", "8h5s", "13h5s"}, func(s string) {
-		GetReward2Hour(manager, str, s)
+	countdownTime := make(chan string, 1)
+	selected := widget.NewSelect([]string{"0h10s", "4h5s", "6h5s", "8h5s", "13h5s"}, func(s string) {
+		GetReward(manager, str, s)
+		countdownTime <- s
 		fmt.Println("selected", s)
 	})
 	selected.Alignment = 1
@@ -102,6 +105,7 @@ func Run() {
 		//selected,
 		container.New(layout.NewStackLayout(), slider),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), workLabel, layout.NewSpacer()),
+		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), rwTimeLabel, layout.NewSpacer()),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), timeLabel, layout.NewSpacer()),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), gif, hyperlink, layout.NewSpacer()),
 	)
@@ -158,6 +162,7 @@ func Run() {
 	}
 
 	go updateTimeLabel(timeLabel)
+	go updateRewardTimeLabel(rwTimeLabel, countdownTime)
 	//GetReward2Hour(manager, str) // 注册
 	GetFish8Hour(manager, str) // 注册
 
@@ -227,13 +232,48 @@ func updateTimeLabel(label *widget.Label) {
 	}
 }
 
+func updateRewardTimeLabel(label *widget.Label, ch chan string) {
+	startTime := time.Now()
+
+	var timeString string
+	for {
+		select {
+		case timeString = <-ch:
+			startTime = time.Now()
+		default:
+			// 解析时间字符串
+			duration, err := time.ParseDuration(timeString)
+			if err != nil {
+				fmt.Println("无法解析时间字符串:", err)
+				return
+			}
+
+			// 获取倒计时的结束时间
+			endTime := startTime.Add(duration)
+
+			// 计算剩余时间
+			remainingTime := endTime.Sub(time.Now())
+
+			// 如果剩余时间小于等于0，表示倒计时结束
+			if remainingTime <= 0 {
+				fmt.Println("本轮倒计时结束!")
+				startTime = time.Now()
+				endTime = startTime.Add(duration) // 重新开始
+			}
+			label.SetText("Reward Time : " + remainingTime.Truncate(time.Second).String())
+		}
+		time.Sleep(time.Second) // 每秒更新一次
+	}
+}
+
 var (
 	mutex      sync.Mutex
 	activeGor  bool
 	exitSignal chan struct{}
 )
 
-func GetReward2Hour(m *job.Manager, str binding.String, timeString string) {
+// GetReward 根据自定义收菜时间执行
+func GetReward(m *job.Manager, str binding.String, timeString string) {
 
 	interval, err := time.ParseDuration(timeString)
 	if err != nil {
@@ -242,9 +282,8 @@ func GetReward2Hour(m *job.Manager, str binding.String, timeString string) {
 	}
 	fmt.Println(interval.String())
 
-	// 创建一个每隔4小时触发一次的Ticker
+	// 创建一个每隔 interval 触发一次的Ticker
 	ticker := time.NewTicker(interval)
-	//ticker := time.NewTicker(30 * time.Second)
 
 	// 使用互斥锁控制goroutine的创建和销毁
 	mutex.Lock()
