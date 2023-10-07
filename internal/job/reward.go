@@ -8,6 +8,16 @@ import (
 )
 
 func (m *Manager) GetReward() {
+	// 检查咸鱼之王小程序是否存活,或者是否被顶号
+	isAlived, errCheck := m.CheckSaltfishAppAlived()
+	if errCheck != nil {
+		fmt.Println("Failed to Check Saltfish App Alived")
+		return
+	}
+	if !isAlived { // 咸鱼之王小程序被关闭,尝试重新登录
+		m.Restart()
+	}
+
 	instance := m.GetInstance()
 	// instance.mu.Lock() 是阻塞操作，这里使用 TryLock进行判断
 	tryLock := instance.mu.TryLock()
